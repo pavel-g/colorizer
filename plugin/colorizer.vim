@@ -271,6 +271,23 @@ function s:RgbaColorForTerm(str, lineno) "{{{3
   endwhile
   return ret
 endfunction
+function s:XTermColor(str, lineno) "{{{3
+  let ret = []
+  let place = 0
+  let colorpat = '\<\d\{1,3\}\>'
+  while 1
+    let foundcolor = matchstr(a:str, colorpat, place)
+    let place = matchend(a:str, colorpat, place)
+    if empty(foundcolor)
+      break
+    endif
+    let pat = '\<' . foundcolor . '\>'
+    let color = s:Xterm2rgb(foundcolor)
+    let colorStr = printf('#%02x%02x%02x', color[0], color[1], color[2])
+    call add( ret, [ colorStr, pat ] )
+  endwhile
+  return ret
+endfunction
 function s:PreviewColorInLine(where) "{{{2
   let line = getline(a:where)
   for Func in s:ColorFinder
@@ -354,7 +371,7 @@ for c in range(0, 254)
   let s:color = s:Xterm2rgb(c)
   call add(s:colortable, s:color)
 endfor
-let s:ColorFinder = [function('s:HexCode'), function('s:RgbColor'), function('s:RgbaColor')]
+let s:ColorFinder = [function('s:HexCode'), function('s:RgbColor'), function('s:RgbaColor'), function('s:XTermColor')]
 let s:force_group_update = 0
 let s:predefined_fgcolors = {}
 let s:predefined_fgcolors['dark']  = ['#444444', '#222222', '#000000']
