@@ -389,6 +389,17 @@ let s:saved_fgcontrast = g:colorizer_fgcontrast
 if !exists('g:colorizer_startup') || g:colorizer_startup
   call s:ColorHighlight(0)
 endif
+" Global functions {{{2
+function! ColorizerRgb2xterm(color)
+  let r = s:Rgb2xterm(a:color)
+  echo r
+  return r
+endfunction
+function! ColorizerXterm2rgb(color)
+  let r = s:Xterm2rgb(a:color)
+  echo r
+  return r
+endfunction
 "Define commands {{{2
 command -bar -bang ColorHighlight call s:ColorHighlight(1, "<bang>")
 command -bar ColorClear call s:ColorClear()
