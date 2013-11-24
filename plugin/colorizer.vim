@@ -390,15 +390,39 @@ if !exists('g:colorizer_startup') || g:colorizer_startup
   call s:ColorHighlight(0)
 endif
 " Global functions {{{2
+function! ColorizerWordUnderCursor()
+  return expand('<cword>')
+endfunction
 function! ColorizerRgb2xterm(color)
   let r = s:Rgb2xterm(a:color)
-  echo r
   return r
 endfunction
 function! ColorizerXterm2rgb(color)
   let r = s:Xterm2rgb(a:color)
-  echo r
   return r
+endfunction
+function! ColorizerConvertColor(color)
+  let colorFinder = [ function('s:HexCode'), function('s:XTermColor') ]
+  for Func in colorFinder
+    let ret = Func( a:color, 1 )
+    if len(ret) > 0
+      if Func == function('s:HexCode')
+        let convertedColor = ColorizerRgb2xterm(a:color)
+      elseif Func == function('s:XTermColor')
+        let cc = ColorizerXterm2rgb(a:color)
+        let convertedColor = printf( '#%02x%02x%02x', cc[0], cc[1], cc[2] )
+      else
+        let convertedColor = 'fail'
+      endif
+    endif
+  endfor
+  return convertedColor
+endfunction
+function! ColorizerReplaceColor()
+  let oldColor = ColorizerWordUnderCursor()
+  let newColor = ColorizerConvertColor(oldColor)
+  "call substitute( getline('.'), oldColor, newColor, '' )
+  exe "s/" . oldColor . "/" . newColor . "/"
 endfunction
 "Define commands {{{2
 command -bar -bang ColorHighlight call s:ColorHighlight(1, "<bang>")
