@@ -418,11 +418,35 @@ function! ColorizerConvertColor(color)
   endfor
   return convertedColor
 endfunction
-function! ColorizerReplaceColor()
+function! ColorizerReplaceColor(newColor)
   let oldColor = ColorizerWordUnderCursor()
-  let newColor = ColorizerConvertColor(oldColor)
   "call substitute( getline('.'), oldColor, newColor, '' )
-  exe "s/" . oldColor . "/" . newColor . "/"
+  exe "s/" . oldColor . "/" . a:newColor . "/"
+endfunction
+function! ColorizerInvertColor(color)
+python << endpython
+def invertColor(color):
+  r = hexToInt( color[1:3] )
+  g = hexToInt( color[3:5] )
+  b = hexToInt( color[5:7] )
+  r = 255 - r
+  g = 255 - g
+  b = 255 - b
+  return "#" + intToHex(r) + intToHex(g) + intToHex(b)
+
+def hexToInt(h):
+  return int( h, 16 )
+
+def intToHex(i):
+  h = ( hex(i) )[2:5]
+  if len(h) < 2:
+    h = "0" + h
+  return h
+
+color = vim.eval("a:color")
+newcolor = invertColor(color)
+vim.command( "return \"" + newcolor + "\"" )
+endpython
 endfunction
 "Define commands {{{2
 command -bar -bang ColorHighlight call s:ColorHighlight(1, "<bang>")
